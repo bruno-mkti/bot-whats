@@ -1,7 +1,9 @@
 const qrcode = require('qrcode-terminal');
+const { Client, LocalAuth } = require('whatsapp-web.js');
 
-const { Client } = require('whatsapp-web.js');
-const client = new Client();
+const client = new Client({
+    authStrategy: new LocalAuth()
+});
 
 client.on('qr', qr => {
     qrcode.generate(qr, { small: true });
@@ -11,45 +13,60 @@ client.on('ready', () => {
     console.log('✅ Bot está pronto e conectado!');
 });
 
-client.on('message', message => {
-    if (message.body.toLocaleLowerCase() === 'oi') {
-        client.sendMessage(message.from, 'Olá, eu sou o seu atendente virtual da Ton e vou te ajudar escolher a melhor maquininha para sua empresa');
-        client.sendMessage(message.from, 'Digite a opção desejada:');
-        client.sendMessage(message.from, '1. Quero conhecer os modelos 📌');
-        client.sendMessage(message.from, '2. Quero saber sobre taxas 💰');
-        client.sendMessage(message.from, '3. Prazo de entrega 📆');
+// Função auxiliar para simular digitação com atraso
+async function sendWithTyping(chatId, text, delay = 2000) {
+    // usaremos apenas um atraso para simular que o bot está "digitando..."
+    await new Promise(resolve => setTimeout(resolve, delay));
+    // Envia a mensagem
+    client.sendMessage(chatId, text);
+}
+
+/* ===== Fluxo de mensagens simulando uma conversa ===== */
+client.on('message', async (message) => {
+    const texto = message.body.toLowerCase();
+
+    if (texto === 'oi' || texto === 'olá' || texto === 'ola') {
+        await sendWithTyping(message.from, "Olá! 😊 Bem-vindo(a)!");
+        await sendWithTyping(message.from, "Eu sou o Assistente virtual da Ton e estou aqui para te ajudar escolher sua maquininha.");
+        await sendWithTyping(message.from, "Selecione uma das opções:\n\n1️⃣ Quero conhecer os modelos 💳\n2️⃣ Quero saber sobre as taxas 💰\n3️⃣ Quero saber o prazo de entrega 📆");
+        return;
     }
 
-    if (message.body.toLocaleLowerCase() == '1') {
-        client.sendMessage(message.from, 'Temos várias opções de maquininhas. Digite a opção que mais se encaixa no seu negócio:');
-        client.sendMessage(message.from, 'T1. Ton T1 – Pequena, moderna e conecta via Bluetooth com o celular');
-        client.sendMessage(message.from, 'T2. Ton T2 – Pequena Possui chip próprio, sem necessidade de celular');
-        client.sendMessage(message.from, 'T3. SmartTon T3 – A mais completa com Wi-Fi, 4G, tela Touch e comprovante de recibo');
+    if (texto === '2') { // Se o usuário escolheu saber sobre taxas
+        await sendWithTyping(message.from, "Estamos com as menores taxas do mercado:");
+        await sendWithTyping(message.from, "✅ Débito: 0,74%");
+        await sendWithTyping(message.from, "✅ Crédito à vista: 0,74%");
+        await sendWithTyping(message.from, "✅ Crédito em até 12x: 8,99%");
+        await sendWithTyping(message.from, "Digite 1 e escolha um modelo de maquininha");
+        return;
     }
 
-    if (message.body.toLocaleLowerCase() == '2') {
-        client.sendMessage(message.from, 'Estamos com as menores taxas do mercado: Débito: 0,74% | Crédito à vista: 0,74% | Crédito em até 12x: 8,99%');
-        client.sendMessage(message.from, 'Entre no link e faça seu pedido: https://ton.com.br/catalogo/?referrer=61B2AA16-ED2A-4436-86B8-13874294904D&utm_medium=invite_share&utm_source=revendedor');
-    }
-    
-    if (message.body.toLocaleLowerCase() == '3') {
-        client.sendMessage(message.from, 'Nosso prazo é de até 10 dias úteis');
-        client.sendMessage(message.from, 'Digite 1 e escolha sua maquininha');
+    if (texto === '3') { // Se o usuário escolheu saber o prazo de entrega
+        await sendWithTyping(message.from, "O prazo de entrega das maquininhas podem variar de acordo com o modelo escolhido.");
+        await sendWithTyping(message.from, "Confira o prazo de entrega direto no carrinho e no resumo do seu pedido.");
+        await sendWithTyping(message.from, "Digite 1 e escolha um modelo de maquininha");
+        return;
     }
 
-    if (message.body.toLocaleLowerCase() == 'T1') {
-        client.sendMessage(message.from, 'Ótima escolha! essa maquininha vai ser a perfeita para o seu negócio');
-        client.sendMessage(message.from, 'Entre no link e faça seu pedido: https://bit.ly/MinizinhaTonT1');
+    if (texto === '1') { // Se o usuário quiser conhecer os modelos
+        await sendWithTyping(message.from, "Aqui estão nossos modelos de maquininhas:");
+        await sendWithTyping(message.from, "🔹 T1 - Pequena e prática (conecta ao celular).");
+        await sendWithTyping(message.from, "🔹 T2 - Não precisa de celular, funciona com chip próprio.");
+        await sendWithTyping(message.from, "🔹 T3 - A mais completa, com tela touch e recibo impresso.");
+        await sendWithTyping(message.from, "Digite T1, T2 ou T3 para saber mais.");
+        return;
     }
 
-    if (message.body.toLocaleLowerCase() == 'T2') {
-        client.sendMessage(message.from, 'Ótima escolha! essa maquininha vai ser a perfeita para o seu negócio');
-        client.sendMessage(message.from, 'Entre no link e faça seu pedido: https://bit.ly/T2BlackTon');
-    }
-    
-    if (message.body.toLocaleLowerCase() == 'T3') {
-        client.sendMessage(message.from, 'Ótima escolha! essa maquininha vai ser a perfeita para o seu negócio');
-        client.sendMessage(message.from, 'Entre no link e faça seu pedido: https://bit.ly/SmartTonT3');
+    if (texto === 't1' || texto === 't2' || texto === 't3') {
+        let url = "";
+        if (texto === 't1') url = "https://bit.ly/MinizinhaTonT1";
+        if (texto === 't2') url = "https://bit.ly/T2BlackTon";
+        if (texto === 't3') url = "https://bit.ly/SmartTonT3";
+
+        await sendWithTyping(message.from, "Ótima escolha! Vou te redirecionar para a página de compra...");
+        await sendWithTyping(message.from, `Clique aqui para comprar: ${url}`);
+        return;
     }
 });
+
 client.initialize();
