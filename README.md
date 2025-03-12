@@ -1,6 +1,6 @@
 # Bot de opções desenvolvido para atendentes virtuais
 
-Como executar:
+## Como executar:
 
 1- Instale o Node.js
 
