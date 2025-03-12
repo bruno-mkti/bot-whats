@@ -1,4 +1,4 @@
-# Bot de opções desenvolvido para atendentes virtuais
+# Bot de opções desenvolvido em JavaScript para atendentes virtuais.
 
 ## Como executar:
 
