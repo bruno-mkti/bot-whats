@@ -1,86 +1,120 @@
+// leitor de qr code
 const qrcode = require('qrcode-terminal');
-
-const { Client } = require('whatsapp-web.js');
+const { Client, Buttons, List, MessageMedia } = require('whatsapp-web.js'); // Mudança Buttons
 const client = new Client();
-
+// serviço de leitura do qr code
 client.on('qr', qr => {
-    qrcode.generate(qr, { small: true });
+    qrcode.generate(qr, {small: true});
 });
-
+// apos isso ele diz que foi tudo certo
 client.on('ready', () => {
-    console.log('✅ Bot está pronto e conectado!');
+    console.log('Tudo certo! WhatsApp conectado.');
 });
-
-function sendMessageWithDelay(chatId, messages, delay = 2000) {
-    messages.forEach((msg, index) => {
-        setTimeout(() => {
-            client.sendMessage(chatId, msg);
-        }, index * delay);
-    });
-}
-
-client.on('message', message => {
-    const msgText = message.body.toLocaleLowerCase();
-    const chatId = message.from;
-
-    if (msgText === 'oi') {
-        sendMessageWithDelay(chatId, [
-            'Olá, eu sou o seu atendente virtual da Ton e vou te ajudar a escolher a melhor maquininha para sua empresa.',
-            'Digite a opção desejada:',
-            '1. Quero conhecer os modelos 💳',
-            '2. Quero saber sobre taxas 💰',
-            '3. Prazo de entrega 📆'
-        ]);
-    }
-
-    if (msgText === '1') {
-        sendMessageWithDelay(chatId, [
-            'Temos várias opções de maquininhas. Digite a opção que mais se encaixa no seu negócio:',
-            'T1. Pequena, moderna e conecta via Bluetooth com o celular',
-            'T2. Pequena Possui chip próprio, sem necessidade de celular',
-            'T3. SmartTon T3 – A mais completa com Wi-Fi, 4G, tela Touch e comprovante de recibo',
-            'Digite T1, T2 ou T3.'
-        ]);
-    }
-
-    if (msgText === '2') {
-        sendMessageWithDelay(chatId, [
-            'Estamos com as menores taxas do mercado:', 
-            '☑️ Débito: 0,74%',
-            '☑️ Crédito à vista: 0,74%',
-            '☑️ Crédito em até 12x: 8,99%',
-            'Digite 1 e escolha sua maquininha.'
-        ]);
-    }
-    
-    if (msgText === '3') {
-        sendMessageWithDelay(chatId, [
-            'O prazo de entrega das maquininhas pode variar de acordo com o modelo escolhido.', 
-            'Confira o prazo de entrega direto no carrinho e no resumo do seu pedido.',
-            'Digite 1 e escolha sua maquininha.'
-        ]);
-    }
-
-    if (msgText === 't1') {
-        sendMessageWithDelay(chatId, [
-            'Ótima escolha! Essa maquininha é perfeita para o seu negócio.',
-            'Entre no link e faça seu pedido: https://bit.ly/MinizinhaTonT1'
-        ]);
-    }
-
-    if (msgText === 't2') {
-        sendMessageWithDelay(chatId, [
-            'Ótima escolha! Essa maquininha é perfeita para o seu negócio.',
-            'Entre no link e faça seu pedido: https://bit.ly/T2BlackTon'
-        ]);
-    }
-    
-    if (msgText === 't3') {
-        sendMessageWithDelay(chatId, [
-            'Ótima escolha! Essa maquininha é perfeita para o seu negócio.',
-            'Entre no link e faça seu pedido: https://bit.ly/SmartTonT3'
-        ]);
-    }
-});
-
+// E inicializa tudo 
 client.initialize();
+
+const delay = ms => new Promise(res => setTimeout(res, ms)); // Função que usamos para criar o delay entre uma ação e outra
+
+// Funil
+
+client.on('message', async msg => {
+
+    if (msg.body.match(/(menu|Menu|dia|tarde|noite|oi|Oi|Olá|olá|ola|Ola)/i) && msg.from.endsWith('@c.us')) {
+
+        const chat = await msg.getChat();
+
+        await delay(3000); //delay de 3 segundos
+        await chat.sendStateTyping(); // Simulando Digitação
+        await delay(3000); //Delay de 3000 milisegundos mais conhecido como 3 segundos
+        const contact = await msg.getContact(); //Pegando o contato
+        const name = contact.pushname; //Pegando o nome do contato
+        await client.sendMessage(msg.from,'Olá! '+ name.split(" ")[0] + 'Sou o assistente virtual da empresa tal. Como posso ajudá-lo hoje? Por favor, digite uma das opções abaixo:\n\n1 - Como funciona\n2 - Valores dos planos\n3 - Benefícios\n4 - Como aderir\n5 - Outras perguntas'); //Primeira mensagem de texto
+        await delay(3000); //delay de 3 segundos
+        await chat.sendStateTyping(); // Simulando Digitação
+        await delay(5000); //Delay de 5 segundos
+    
+        
+    }
+
+
+    if (msg.body !== null && msg.body === '1' && msg.from.endsWith('@c.us')) {
+        const chat = await msg.getChat();
+
+
+        await delay(3000); //delay de 3 segundos
+        await chat.sendStateTyping(); // Simulando Digitação
+        await delay(3000);
+        await client.sendMessage(msg.from, 'Nosso serviço oferece consultas médicas 24 horas por dia, 7 dias por semana, diretamente pelo WhatsApp.\n\nNão há carência, o que significa que você pode começar a usar nossos serviços imediatamente após a adesão.\n\nOferecemos atendimento médico ilimitado, receitas\n\nAlém disso, temos uma ampla gama de benefícios, incluindo acesso a cursos gratuitos');
+
+        await delay(3000); //delay de 3 segundos
+        await chat.sendStateTyping(); // Simulando Digitação
+        await delay(3000);
+        await client.sendMessage(msg.from, 'COMO FUNCIONA?\nÉ muito simples.\n\n1º Passo\nFaça seu cadastro e escolha o plano que desejar.\n\n2º Passo\nApós efetuar o pagamento do plano escolhido você já terá acesso a nossa área exclusiva para começar seu atendimento na mesma hora.\n\n3º Passo\nSempre que precisar');
+
+        await delay(3000); //delay de 3 segundos
+        await chat.sendStateTyping(); // Simulando Digitação
+        await delay(3000);
+        await client.sendMessage(msg.from, 'Link para cadastro: https://site.com');
+
+
+    }
+
+    if (msg.body !== null && msg.body === '2' && msg.from.endsWith('@c.us')) {
+        const chat = await msg.getChat();
+
+
+        await delay(3000); //Delay de 3000 milisegundos mais conhecido como 3 segundos
+        await chat.sendStateTyping(); // Simulando Digitação
+        await delay(3000);
+        await client.sendMessage(msg.from, '*Plano Individual:* R$22,50 por mês.\n\n*Plano Família:* R$39,90 por mês, inclui você mais 3 dependentes.\n\n*Plano TOP Individual:* R$42,50 por mês, com benefícios adicionais como\n\n*Plano TOP Família:* R$79,90 por mês, inclui você mais 3 dependentes');
+
+        await delay(3000); //delay de 3 segundos
+        await chat.sendStateTyping(); // Simulando Digitação
+        await delay(3000);
+        await client.sendMessage(msg.from, 'Link para cadastro: https://site.com');
+    }
+
+    if (msg.body !== null && msg.body === '3' && msg.from.endsWith('@c.us')) {
+        const chat = await msg.getChat();
+
+
+        await delay(3000); //Delay de 3000 milisegundos mais conhecido como 3 segundos
+        await chat.sendStateTyping(); // Simulando Digitação
+        await delay(3000);
+        await client.sendMessage(msg.from, 'Sorteio de em prêmios todo ano.\n\nAtendimento médico ilimitado 24h por dia.\n\nReceitas de medicamentos');
+        
+        await delay(3000); //delay de 3 segundos
+        await chat.sendStateTyping(); // Simulando Digitação
+        await delay(3000);
+        await client.sendMessage(msg.from, 'Link para cadastro: https://site.com');
+
+    }
+
+    if (msg.body !== null && msg.body === '4' && msg.from.endsWith('@c.us')) {
+        const chat = await msg.getChat();
+
+        await delay(3000); //Delay de 3000 milisegundos mais conhecido como 3 segundos
+        await chat.sendStateTyping(); // Simulando Digitação
+        await delay(3000);
+        await client.sendMessage(msg.from, 'Você pode aderir aos nossos planos diretamente pelo nosso site ou pelo WhatsApp.\n\nApós a adesão, você terá acesso imediato');
+
+
+        await delay(3000); //delay de 3 segundos
+        await chat.sendStateTyping(); // Simulando Digitação
+        await delay(3000);
+        await client.sendMessage(msg.from, 'Link para cadastro: https://site.com');
+
+    }
+
+    if (msg.body !== null && msg.body === '5' && msg.from.endsWith('@c.us')) {
+        const chat = await msg.getChat();
+
+        await delay(3000); //Delay de 3000 milisegundos mais conhecido como 3 segundos
+        await chat.sendStateTyping(); // Simulando Digitação
+        await delay(3000);
+        await client.sendMessage(msg.from, 'Se você tiver outras dúvidas ou precisar de mais informações, por favor, fale aqui nesse whatsapp ou visite nosso site: https://site.com ');
+
+
+    }
+
+});
